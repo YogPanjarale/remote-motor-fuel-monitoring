@@ -2,6 +2,7 @@ import express, { Request, Response } from "express";
 require('dotenv').config();
 import client from './mqtt'
 import events from './events'
+import './devices/id/engine'
 //make express app
 const app = express();
 //use json
@@ -16,13 +17,16 @@ app.get("/", (_req: Request, res: Response) => {
 //ping mqtt
 app.get("/ping", (_req: Request, res: Response) => {
     client.publish("ping", "pong");
+    events.emit("ping");
     res.json("pong");
 });
-app.get('devices/:id/engine/on',(req,_res)=>{
+app.get('/devices/:id/engine/on',(req,res)=>{
     events.emit('engine:on',req.params.id);
+    res.json("Ok");
 })
-app.get('devices/:id/engine/off',(req,_res)=>{
+app.get('/devices/:id/engine/off',(req,res)=>{
     events.emit('engine:off',req.params.id);
+    res.json("Ok");
 })
 //start server
 app.listen(port, () => {

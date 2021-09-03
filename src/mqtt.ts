@@ -3,6 +3,7 @@ const [username, password]: string[] = process.env.AUTH_TOKEN?.split(".") || [
 	"",
 ];
 import mqtt from "async-mqtt";
+import events from './events';
 
 const options = {
 	port: parseInt(`${process.env.MQTT_PORT || 1883}`),
@@ -32,5 +33,6 @@ if (process.env.MQTT !== "false") {
 	client.on("message", async (_topic, _message) => {
 		console.log(`MQTT message: ${_topic} ${_message}`);
 	});
+    events.on("mqtt.publish", ({topic, payload}) => {client.publish(topic, payload)});
 }
 export default client;
