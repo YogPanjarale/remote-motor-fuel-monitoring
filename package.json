@@ -1,0 +1,30 @@
+{
+  "name": "remote-fuel-monitoring-and-motor-control",
+  "version": "1.0.0",
+  "description": "Controlling motor pump remotely and monitor fuel",
+  "main": "index.js",
+  "scripts": {
+    "watch": "tsc -w",
+    "dev": "nodemon dist/index.js",
+    "dev2": "nodemon src/index.ts",
+    "start": "node dist/index.js",
+    "start2": "ts-node dist/index.js",
+    "build": "tsc"
+  },
+  "keywords": [],
+  "author": "Yog Panjarale",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/express": "^4.17.13",
+    "@types/node": "^14.0.27",
+    "@types/ws": "^7.4.7",
+    "nodemon": "^2.0.4",
+    "typescript": "^3.9.7"
+  },
+  "dependencies": {
+    "async-mqtt": "^2.6.1",
+    "dotenv": "^10.0.0",
+    "express": "^4.17.1",
+    "mqtt": "^4.2.8"
+  }
+}
