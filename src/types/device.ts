@@ -15,3 +15,8 @@ export interface MqttEvent {
     topic: string;
     payload: string;
 }
+export interface TemperatureEvent {
+    id: string;
+    no: number;
+    value: number;
+}

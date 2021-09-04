@@ -3,7 +3,7 @@ import {connect} from "mongoose";
 require('dotenv').config();
 import client from './mqtt'
 import events from './events'
-import './devices/id/engine';
+import './devices/engine';
 import { DeviceModel } from "./models/device";
 import { Engine } from "./types/device";
 (async () => await connect(process.env.MONGO_URL||""))();
@@ -28,26 +28,42 @@ app.get('/devices/:id/create',async (req,res)=>{
     if (req.params.id) {
         const device = await DeviceModel.findOne({id:req.params.id});
         if (device) {
-            return res.json(device);
+            return res.json({status:"success",device,message:"device already exists"});
         } else {
             const engine :Engine = {cell:'off',temperature1:0,temperature2:0,temperature3:0,rpm:0,runnning:false};
             const newDevice = new DeviceModel({id:req.params.id,engine:engine});
             await newDevice.save();
-            return res.json(newDevice);
+            return res.json({status:"success",newDevice,message:"device created successfully"});
+        }
+    }
+    return res.json({error:"no id"});
+})
+app.get('/devices/:id',async (req,res)=>{
+    if (req.params.id) {
+        const device = await DeviceModel.findOne({id:req.params.id});
+        if (device) {
+            return res.json({status:"success",device,message:"device found"});
+        } else {
+            return res.json({status:"error",error:"device not found"});
         }
     }
     return res.json({error:"no id"});
 })
 app.get('/devices/:id/engine/start',(req,res)=>{
     events.emit('engine:start',req.params.id);
-    res.json("Ok");
+    res.json({status:"success",message:"engine started"});
 })
 app.get('/devices/:id/engine/stop',(req,res)=>{
     events.emit('engine:stop',req.params.id);
-    res.json("Ok");
+    res.json({status:"success",message:"engine stopped"});
 })
-app.get('/devices/:id/engine/status',(req:Request,res:Response)=>{
-    res.json(events.emit('engine:status',req.params.id));
+app.get('/devices/:id/engine/status',async (req:Request,res:Response)=>{
+    const device = await DeviceModel.findOne({id:req.params.id});
+    if (device) {
+        return res.json({status:"success",device,message:"device found"});
+    } else {
+        return res.json({status:"error",error:"device not found"});
+    }
 });
 //start server
 app.listen(port, () => {
