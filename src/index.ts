@@ -7,6 +7,7 @@ import './devices/engine';
 import { DeviceModel } from "./models/device";
 import { Engine } from "./types/device";
 (async () => await connect(process.env.MONGO_URL||""))();
+const apiKey = process.env.API_KEY || "thiswon'tworkinprod";
 //make express app
 const app = express();
 //use json
@@ -25,6 +26,9 @@ app.get("/ping", (_req: Request, res: Response) => {
     res.json("pong");
 });
 app.get('/devices/:id/create',async (req,res)=>{
+    if (req.body.apiKey !== apiKey) {
+        res.status(403).json({error: "apiKey is not valid",message:"api key required to create device"});
+    }
     if (req.params.id) {
         const device = await DeviceModel.findOne({id:req.params.id});
         if (device) {

@@ -2,6 +2,7 @@ export interface Engine {
     temperature1?:number;
     temperature2?:number;
     temperature3?:number;
+    temperature4vacuum?:number;
     rpm?:number;
     cell:"on"|"off";
     runnning:boolean;
