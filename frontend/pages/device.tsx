@@ -25,8 +25,8 @@ function Device() {
 				</h1>
 				<hr className="h-2 w-full bg-gray-200 my-2 " />
 				<div>
-					<h2 className="text-xl font-bold text-gray-700 ">
-						Motor Pump Control
+					<h2 className="text-2xl font-bold text-gray-700 ">
+						Engine
 					</h2>
 					<div className="relative inline-block w-10 mr-2 pt-2 align-middle select-none transition duration-200 ease-in ">
 						<input
@@ -60,6 +60,39 @@ function Device() {
 					<p className="text-xl text-gray-800 font-bold py-2 rounded">
 						Engine RPM : {engineRpm} RPM
 					</p>
+					{/* Engine Running hours */}
+					<p className="text-xl text-gray-800 font-bold py-2 rounded">
+						Engine Running hours : 0 hours
+					</p>
+					<hr className="h-2 w-full bg-gray-200 my-2 " />
+					<h2 className="text-2xl font-bold text-gray-700 ">Water</h2>
+					<p className="text-xl text-gray-800 font-bold py-2 rounded">
+						Water Presence : No
+					</p>
+					<p className="text-xl text-gray-800 font-bold py-2 rounded">
+						Dry Run : No
+					</p>
+					<p className="text-xl text-gray-800 font-bold py-2 rounded">
+						Water Flow : 0 L/min
+					</p>
+					<p className="text-xl text-gray-800 font-bold py-2 rounded">
+						Water Flow Volume (Total) : 0 L
+					</p>
+					<hr className="h-2 w-full bg-gray-200 my-2 " />
+					<h2 className="text-2xl font-bold text-gray-700 ">Fuel</h2>
+					<p className="text-xl text-gray-800 font-bold py-2 rounded">
+						Fuel Volume : 0 L
+					</p>
+					<p className="text-xl text-gray-800 font-bold py-2 rounded">
+						Fuel Filled Percentage : 0 %
+					</p>
+					<p className="text-xl text-gray-800 font-bold py-2 rounded">
+						Fuel Filled Quantity : 0 L
+					</p>
+					<p className="text-xl text-gray-800 font-bold py-2 rounded">
+						Fuel Drained Quantity : 0 L
+					</p>
+					<hr className="h-2 w-full bg-gray-200 my-2 " />
 				</div>
 			</div>
 		</>
