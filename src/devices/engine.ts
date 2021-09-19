@@ -51,3 +51,11 @@ event.on('engine:rpm',async (data:{id:string,value:number}) => {
     }
     console.log(`engine:rpm:${data.id}`);
 });
+event.on('engine:water',async (data:{id:string,value:number}) => {
+    const device = await DeviceModel.findOne({id:data.id});
+    if (device){
+        device.water=data.value
+        device.save();
+    }
+    console.log(`engine:rpm:${data.id}`);
+});

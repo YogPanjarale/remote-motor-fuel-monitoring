@@ -16,7 +16,8 @@ const deviceSchema = new Schema<Device>({
     engine:{
         type: engineSchema,
         required: true
-    }
+    },
+    water : {type: Number, required: false}
 });
 
 export const DeviceModel = model<Device>('Device', deviceSchema);

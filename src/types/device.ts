@@ -11,6 +11,7 @@ export interface Engine {
 export interface Device {
     id: string;
     engine : Engine;
+    water:number;
 }
 export interface MqttEvent { 
     topic: string;
