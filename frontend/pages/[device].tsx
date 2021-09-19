@@ -1,19 +1,73 @@
 import Head from "next/head";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { withUrl } from "../utils/utils";
+import { useRouter } from "next/router";
+import { GetServerSideProps } from 'next'
 
-function Device() {
+function Device({device}) {
+console.log(device);
 	const [checkBox, setCheckBox] = useState(false);
 	const [engineTemp1, setengineTemp1] = useState(0);
 	const [engineTemp2, setengineTemp2] = useState(0);
 	const [engineTemp3, setengineTemp3] = useState(0);
 	const [vacuumTemp, setVacuumTemp] = useState(0);
 	const [engineRpm, setEngineRpm] = useState(0);
+	const [deviceId, setDeviceId] = useState(device);
+	const [errorMessage, setErrorMessage] = useState("");
+	const [waterPresent, setWaterPresent] = useState(false);
 	const handleChange = (e: React.FormEvent<HTMLInputElement>) => {
 		//@ts-ignore
 		const value = e.target?.checked;
 		console.log(value);
+		fetch(withUrl(`/devices/${deviceId}/engine/${value==true?"start":"stop"}`)).then((res) => {
+			if (res.status === 200) setCheckBox(value);
+		})
 		setCheckBox(value);
 	};
+	useEffect(() => {
+		console.log(withUrl(`/devices/${deviceId}`));
+		fetch(withUrl(`/devices/${deviceId}`))
+			.then(async (response) => {
+				const data = await response.json();
+				console.log(data);
+				if (data.device) {
+					const { id, engine, water } = data.device;
+					setDeviceId(id);
+					setengineTemp1(engine.temperature1);
+					setengineTemp2(engine.temperature2);
+					setengineTemp3(engine.temperature3);
+					setEngineRpm(engine.rpm);
+					// setVacuumTemp(water.temperature);
+					setWaterPresent(water == 1);
+					setCheckBox(engine.cell=="on");
+				} else {
+					setErrorMessage("Device not found");
+				}
+			})
+			.catch((err) => {});
+	}, []);
+	if (errorMessage) {
+		return (
+			<>
+				<Head>
+					<title>Remote Fuel Monitoring and Pump Control</title>
+				</Head>
+				<div className="flex justify-center items-start flex-col p-4 pl-6">
+					<h1 className="text-2xl font-bold my-2 text-gray-800">
+						Remote Fuel Monitoring and Pump Control
+					</h1>
+					<hr className="h-2 w-full bg-gray-200 my-2 " />
+
+					<h2 className="text-xl font-bold text-gray-700 ">
+						Device Id : {deviceId}
+					</h2>
+					<h2 className="text-xl font-bold text-gray-700 ">
+						Error : {errorMessage}
+					</h2>
+				</div>
+			</>
+		);
+	}
 	return (
 		<>
 			<Head>
@@ -100,3 +154,12 @@ function Device() {
 }
 
 export default Device;
+
+export const getServerSideProps: GetServerSideProps = async (context) => {
+	const device = context.query.device
+	return{
+		props:{
+			device
+		}
+	}
+}

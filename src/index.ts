@@ -1,15 +1,19 @@
 import express, { Request, Response } from "express";
 import { connect } from "mongoose";
 require("dotenv").config();
+import cors from 'cors'
 import client from "./mqtt";
 import events from "./events";
 import "./devices/engine";
 import { DeviceModel } from "./models/device";
 import { Engine } from "./types/device";
+
 (async () => await connect(process.env.MONGO_URL || ""))();
 const apiKey = process.env.API_KEY || "thiswon'tworkinprod";
 //make express app
 const app = express();
+//cors
+app.use(cors({origin:'*'}))
 //use json
 app.use(express.json());
 //set port
