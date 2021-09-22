@@ -53,6 +53,10 @@ if (process.env.MQTT !== "false") {
 			const val={id,value:parseInt(message.toString())}
 			events.emit("engine:water",val)
 		}
+		if (condition1 && command === "fuel") {
+			const val={id,value:parseInt(message.toString())}
+			events.emit("engine:fuel",val)
+		}
 
 
 		console.log(`MQTT message: ${topic} ${message}`);

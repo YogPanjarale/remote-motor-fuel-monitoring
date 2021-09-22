@@ -17,6 +17,7 @@ const deviceSchema = new Schema<Device>({
         type: engineSchema,
         required: true
     },
+    fuel_volume: { type: Number, required: true },
     water : {type: Number, required: false}
 });
 

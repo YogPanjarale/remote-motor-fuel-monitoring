@@ -12,6 +12,7 @@ export interface Device {
     id: string;
     engine : Engine;
     water:number;
+    fuel_volume:number;
 }
 export interface MqttEvent { 
     topic: string;

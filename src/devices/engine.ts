@@ -1,6 +1,7 @@
 import { DeviceModel } from '../models/device';
 import event from '../events';
 import { TemperatureEvent } from 'src/types/device';
+import getVolume from 'src/calibration-table';
 // import {De}
 function publish(topic:string,payload:string) {
     event.emit('mqtt.publish',{topic,payload});
@@ -57,5 +58,13 @@ event.on('engine:water',async (data:{id:string,value:number}) => {
         device.water=data.value
         device.save();
     }
-    console.log(`engine:rpm:${data.id}`);
+    console.log(`engine:water:${data.id}`);
+});
+event.on('engine:fuel',async (data:{id:string,value:number}) => {
+    const device = await DeviceModel.findOne({id:data.id});
+    if (device){
+        device.fuel_volume=getVolume(data.value)
+        device.save();
+    }
+    console.log(`engine:fuel:${data.id}`);
 });
