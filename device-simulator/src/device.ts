@@ -17,7 +17,9 @@ class Device {
 	public fuelSensor: number = 0;
 	public engineStatus: "running" | "stopped" = "stopped";
 	public engineRunningTime: number = 0;
-
+    public fuelFilled :number=0;
+    public fuelDrained :number=0;
+    public lastFuelSensor:number=0;
 	constructor(public mqtt: AsyncMqttClient, id?: string) {
 		this.id = id || randomUUID();
 		mqtt.subscribe(`dev-sim/${this.id}/switch`);
@@ -117,7 +119,16 @@ class Device {
 		this.ping();
 	}
     fuelMonitor(){
+        if (this.fuelSensor-this.lastFuelSensor >4){
+            this.fuelFilled+=this.fuelSensor-this.lastFuelSensor;
+            this.publish("fuelFilled",this.fuelFilled);
+        }
+        else if (this.fuelSensor-this.lastFuelSensor < -4){
+            this.fuelDrained+=this.lastFuelSensor-this.fuelSensor;
+            this.publish("fuelDrained",this.fuelDrained);
+        }
 
+        this.lastFuelSensor=this.fuelSensor;
     }
 	get fuelPercentage() {
 		return (this.fuelSensor * 1024) / 100;
