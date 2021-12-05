@@ -22,8 +22,14 @@ class Device {
     public lastFuelSensor:number=0;
 	constructor(public mqtt: AsyncMqttClient, id?: string) {
 		this.id = id || randomUUID();
-		mqtt.subscribe(`dev-sim/${this.id}/switch`);
-		this.fuelFill(1024);
+		const toSubscribe = ["switch","drainFuel","fillFuel"];
+		// mqtt.subscribe(`dev-sim/${this.id}/switch`);
+		toSubscribe.forEach((topic) => {
+			mqtt.subscribe(`dev-sim/${this.id}/${topic}`);
+		});
+		this.fuelSensor = random.int(100, 1024);
+		this.lastFuelSensor=this.fuelSensor;
+		// this.fuelFill(1024);
 		mqtt.on("message", (topic, message) => {
 			if (topic === `dev-sim/${this.id}/switch`) {
 				switch (message.toString()) {
@@ -146,31 +152,25 @@ class Device {
 		this.publish("ping", "1");
 	}
 
-	fuelFill(no: number) {
+	async fuelFill(no: number) {
+		console.log(`${this.id} fuel fill ${no}`);
+		await this.publish("fuelFilled",no.toString())
 		this.fuelSensor = clamp(this.fuelSensor + no, 0, 1024);
-		this.publish("fuelFill",no)
 	}
-    fuelDrain(no:number){
+    async fuelDrain(no:number){
+        await this.publish("fuelDrained",no.toString())
+		console.log(`${this.id} fuel drain ${no}`);
         this.fuelSensor = clamp(this.fuelSensor - no, 0, 1024);
-        this.publish("fuelDrain",no)
     }
 	async publish(key: string, value: any) {
-        if (key=="json"){
-            console.log(`${this.id} ${key} ${value["fuelSensor"]}`);
-        }
-        // console.log(`${this.id} ${key} ${value}`);
-        
-		// if (key===""){
-		//     this.mqtt.publish(`dev-sim/${this.id}/`, JSON.stringify(this));
-		// }
+		console.log("key: ",key);
+		
 		await this.mqtt.publish(
 			`dev-sim/${this.id}/${key}`,
-			JSON.stringify(value)
+			key=="json"?JSON.stringify(value):value
 		);
-		// console.log(`${this.id} published ${key} : ${value}`);
 	}
 	async publishAll() {
-        
 		Promise.all([
 			this.publish("json", {
 				engineStatus: this.engineStatus,
@@ -186,18 +186,6 @@ class Device {
 				fuelSensor: this.fuelSensor,
 				switch: this.switch,
 			}),
-			// this.publish("switch", this.switch),
-			// this.publish("engineRpm", this.engineRpm),
-			// this.publish("engineTemp1", this.engineTemp1),
-			// this.publish("engineTemp2", this.engineTemp2),
-			// this.publish("engineTemp3", this.engineTemp3),
-			// this.publish("engineTempVaccum", this.engineTempVaccum),
-			// this.publish("engineLubeOilPressure", this.engineLubeOilPressure),
-			// this.publish("waterPresence", this.waterPresence),
-			// this.publish("waterFlowRate", this.waterFlowRate),
-			// this.publish("fuelSensor", this.fuelSensor),
-			// this.publish("engineStatus", this.engineStatus),
-			// this.publish("engineRunningTime", this.engineRunningTime),
 		]).then(() => {
 			console.log("published");
 		});
