@@ -1,0 +1,27 @@
+{
+  "name": "mqtt-handler",
+  "version": "1.0.0",
+  "description": "Listens to MQTT messages and saves them to the database",
+  "main": "index.js",
+  "scripts": {
+    "watch": "tsc -w",
+    "build": "tsc",
+    "dev": "nodemon src/index.ts",
+    "dev2": "nodemon dist/index.js",
+    "start": "node dist/index.js",
+    "start2": "ts-node src/index.ts"
+  },
+  "keywords": [],
+  "author": "YogPanjarale",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^14.0.27",
+    "nodemon": "^2.0.4",
+    "typescript": "^3.9.7"
+  },
+  "dependencies": {
+    "async-mqtt": "^2.6.1",
+    "dotenv": "^10.0.0",
+    "mongodb": "^4.2.1"
+  }
+}
