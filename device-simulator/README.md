@@ -8,6 +8,6 @@ publishes sensor values to mqtt broker every 30 second
 
 2. Water Sensors (Presence, flow rate)
 
-3. Fuel Sensors (fuel level (volume) )
+3. Fuel Sensors (fuel level (volume) ,fuelFill, fuelDrain)
 
 4. Engine Control (start, stop, idle) & Engine Status (running, stopped, idle)
