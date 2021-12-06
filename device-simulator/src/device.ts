@@ -172,23 +172,38 @@ class Device {
 	}
 	async publishAll() {
 		Promise.all([
-			this.publish("json", {
-				engineStatus: this.engineStatus,
-				engineRunningTime: this.engineRunningTime,
-				engineRpm: this.engineRpm,
-				engineTemp1: this.engineTemp1,
-				engineTemp2: this.engineTemp2,
-				engineTemp3: this.engineTemp3,
-				engineTempVaccum: this.engineTempVaccum,
-				engineLubeOilPressure: this.engineLubeOilPressure,
-				waterPresence: this.waterPresence,
-				waterFlowRate: this.waterFlowRate,
-				fuelSensor: this.fuelSensor,
-				switch: this.switch,
-			}),
+			this.publish("json", this.makeJSON()),
 		]).then(() => {
 			console.log("published");
 		});
+	}
+	makeJSON(){
+		const engineStatus = "es"
+		const engineRunningTime = "ert"
+		const engineRpm = "erp"
+		const engineTemp1 = "et1"
+		const engineTemp2 = "et2"
+		const engineTemp3 = "et3"
+		const engineTempVaccum = "etv"
+		const engineLubeOilPressure = "elop"
+		const waterPresence = "wp"
+		const waterFlowRate = "wfr"
+		const fuelSensor = "fs"
+		// const _switch = "switch";
+		return {
+			[engineStatus]: this.engineStatus,
+			[engineRunningTime]: this.engineRunningTime,
+			[engineRpm]: this.engineRpm,
+			[engineTemp1]: this.engineTemp1,
+			[engineTemp2]: this.engineTemp2,
+			[engineTemp3]: this.engineTemp3,
+			[engineTempVaccum]: this.engineTempVaccum,
+			[engineLubeOilPressure]: this.engineLubeOilPressure,
+			[waterPresence]: this.waterPresence,
+			[waterFlowRate]: this.waterFlowRate,
+			[fuelSensor]: this.fuelSensor,
+			switch: this.switch,
+		}
 	}
 }
 export { Device };
