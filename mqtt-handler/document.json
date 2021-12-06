@@ -1,0 +1,28 @@
+[{
+    "deviceId": "61646974690a",
+    "ts": "2018-01-31T14:00:00.000Z",
+    "engineStatus": "running",
+    "engineRunningTime": 581,
+    "engineRpm": 1441,
+    "engineTemp1": 152,
+    "engineTemp2": 189,
+    "engineTemp3": 186,
+    "engineTempVaccum": 155,
+    "engineLubeOilPressure": 73,
+    "waterPresence": false,
+    "waterFlowRate": 265,
+    "fuelSensor": 647,
+    "switch": "on"
+},
+{
+    "deviceId": "61646974690a",
+    "type":"fuelFilled",
+    "value": "0.0",
+    "ts":"2018-01-31T14:00:00.000Z"
+},
+{
+    "deviceId": "61646974690a",
+    "type":"fuelDrained",
+    "value": "0.0",
+    "ts":"2018-01-31T14:00:00.000Z"
+}]
