@@ -17,7 +17,7 @@ MongoClient.connect(
 	const events_collection = db.collection("events");
 	const handleMessage: mqtt.OnMessageCallback = (topic, message) => {
 		const [_root, id, key] = topic.split("/");
-        const data = JSON.parse(message.toString());
+        const data = key=="json"?JSON.parse(message.toString()):message.toString();
 		// console.log(id, key, message.toString());
         switch (key) {
             case "json":
