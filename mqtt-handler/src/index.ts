@@ -2,6 +2,7 @@ require("dotenv").config();
 import mqtt from "async-mqtt";
 
 import { MongoClient ,} from "mongodb";
+import { UnpackJson } from "./utils";
 // console.log("hello")
 
 const client =  mqtt.connect("mqtt://do1.yogpanjarale.com:1883", {
@@ -15,22 +16,30 @@ MongoClient.connect(
 	
 	const collection = db.collection("devices-mqtt");
 	const events_collection = db.collection("events");
-	const handleMessage: mqtt.OnMessageCallback = (topic, message) => {
+	const devices = db.collection("devices");
+	const handleMessage: mqtt.OnMessageCallback = async (topic, message) => {
 		const [_root, id, key] = topic.split("/");
         const data = key=="json"?JSON.parse(message.toString()):message.toString();
-		// console.log(id, key, message.toString());
+		// if (key !=="json"){
+		// 	console.log(id, key, message.toString());
+		// }
+		
+		devices.findOneAndUpdate({deviceId:id}, {$set: {[key]: key=="json"?UnpackJson(data):data}}).then(async (result)=>{
+			console.log(result.value);
+			
+		})
         switch (key) {
             case "json":
-                collection.insertOne({deviceId:id,ts:new Date(),...data})
+                await collection.insertOne({deviceId:id,ts:new Date(),...data})
                 break;
 			case "fuelFilled":
-				events_collection.insertOne({deviceId:id,value:data,key:"fuelFilled",ts:new Date()})
+				await events_collection.insertOne({deviceId:id,value:data,key:"fuelFilled",ts:new Date()})
 				break;
 			case "fuelDrained":
-				events_collection.insertOne({deviceId:id,value:data,key:"fuelFilled",ts:new Date()})
+				await events_collection.insertOne({deviceId:id,value:data,key:"fuelFilled",ts:new Date()})
 				break;
 			case "switch":
-				events_collection.insertOne({deviceId:id,value:data,key:"switch",ts:new Date()})
+				await events_collection.insertOne({deviceId:id,value:data,key:"switch",ts:new Date()})
 				break;
 			default:
 				// console.log("default",key)
