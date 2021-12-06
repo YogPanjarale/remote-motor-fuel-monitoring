@@ -2,6 +2,7 @@
 import { AsyncMqttClient } from "async-mqtt";
 import { randomUUID } from "crypto";
 import random from "random";
+import config from "./config";
 import { clamp } from "./utils";
 class Device {
 	public id: string;
@@ -178,17 +179,7 @@ class Device {
 		});
 	}
 	makeJSON(){
-		const engineStatus = "es"
-		const engineRunningTime = "ert"
-		const engineRpm = "erp"
-		const engineTemp1 = "et1"
-		const engineTemp2 = "et2"
-		const engineTemp3 = "et3"
-		const engineTempVaccum = "etv"
-		const engineLubeOilPressure = "elop"
-		const waterPresence = "wp"
-		const waterFlowRate = "wfr"
-		const fuelSensor = "fs"
+		const {engineStatus,engineRunningTime,engineRpm,engineTemp1,engineTemp2,engineTemp3,engineTempVaccum,engineLubeOilPressure,waterPresence,waterFlowRate,fuelSensor} = config.mqtt.topics
 		// const _switch = "switch";
 		return {
 			[engineStatus]: this.engineStatus,
