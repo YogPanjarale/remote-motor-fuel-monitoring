@@ -10,7 +10,7 @@ const client = mqtt.connect(config.mqtt.url, {
 
 // const rule = new schedule.RecurrenceRule();
 const device = new Device(client,"61646974690a")
-const task = schedule.scheduleJob("*/10 * * * * *", async () => {
+const task = schedule.scheduleJob("*/30 * * * * *", async () => {
     device.loop()
     console.log("loop")
 })
