@@ -1,21 +1,20 @@
 #include "Arduino.h"
-
+#include "ArduinoJson.h"
 void setup() {
   Serial.begin(9600);
   pinMode(13, OUTPUT);
 }
 
 void loop() {
+    DynamicJsonDocument doc(1024);
   if (Serial.available() > 0) {
-    int value = Serial.read();
-    if (value == '1') {
+    String input = Serial.readString();
+    deserializeJson(doc, input);
+    Serial.println("You said : " + input);
+    if (doc["command"] == "on") {
       digitalWrite(13, HIGH);
-    } else if (value == '0') {
+    } else if (doc["command"] == "off") {
       digitalWrite(13, LOW);
-    }else {
-      String str = "You Enterd : " + String(value);
-
-      Serial.println(str.c_str());
     }
   }
 }
