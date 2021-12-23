@@ -8,7 +8,7 @@ const SideBar = ({current,setCurrent}:{current:menu,setCurrent}) => {
     const btn = ["Home","History","Settings"]
 	return <div className=" flex flex-col space-y-2  m-2 p-2 bg-gray-800 shadow-md rounded-md">
         {btn.map(n=>{
-            return <button className={`text-lg font-semibold text-white ${current==n?"underline":"shadow-md"}`} onClick={()=>setCurrent(n)}>
+            return <button key={n+"bhurr"} className={`text-lg font-semibold text-white ${current==n?"underline":"shadow-md"}`} onClick={()=>setCurrent(n)}>
 				{n}
 			</button>
         })}
