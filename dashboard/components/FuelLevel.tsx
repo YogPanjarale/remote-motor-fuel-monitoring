@@ -18,6 +18,7 @@ function getFuelLiters(level: number, calibration_table: CalibrationTable) {
     let step = calibration_table.step;
     let table_raw = calibration_table.table;
     let prev = 0;
+    if (!global.cal_table) {
     for (let i = min ; i <= max ; i+=step) {
         for (let j = i ; j <= i+step ; j++) {
             let diff = j-i;
@@ -28,6 +29,10 @@ function getFuelLiters(level: number, calibration_table: CalibrationTable) {
         }
         prev = table_raw[i] || prev;
     }
+    global.cal_table = table;
+}else{
+    table = global.cal_table;
+}
     let index = Math.floor((level - min) / step);
     let value = table[index];
     let percentage = (value / max) * 100;
