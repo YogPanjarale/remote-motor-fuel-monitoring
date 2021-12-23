@@ -1,18 +1,62 @@
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
+import { useQuery } from "react-query";
+import DashBoard from "../../components/dashboard";
+import ErrorPage from "../../components/Error";
+import getDevice from "../../lib/getDevice";
+import clientPromise from "../../lib/mongodb";
+import { DeviceDoc, ErrorResponse } from "../../lib/types";
 
 
-const Page = () => {
-    const id = useRouter().query.id;
-	let [data, setData] = useState(null);
-	useEffect(() => {
+const Page = ({id}) => {
+    // const id = useRouter().query.id;
+	// @ts-ignore
+	const {isLoading, isError, data, error} = useQuery<DeviceDoc|ErrorResponse>("device",async()=>await getDevice(id));
+	const [device, setDevice] = useState<DeviceDoc|ErrorResponse>();
 
-	});
-	return (
-		<div>
-			<h1>Hello {id}</h1>
-		</div>
-	);
+	if (isLoading) {
+		return <span>Loading...</span>
+	  }
+	
+	  if (isError) {
+		  //@ts-ignore
+		return <ErrorPage statusCode={404} message={error.message}/>
+	  }
+	
+	  // We can assume by this point that `isSuccess === true`
+	  return (
+		<DashBoard data={data as DeviceDoc} />
+	  )
+};
+// get static props sends id
+
+export const getStaticProps = async ({ params }) => {
+	const id = params.id;
+	// console.log(id)
+	return {
+		props: {
+			id,
+		},
+	};
+};
+export const getStaticPaths = async () => {
+	// const client = await clientPromise;
+	// const coll = client.db("rfms").collection("devices");
+	// const docs = await coll.find({}).toArray();
+	// const paths = docs.map((doc) => ({
+	// 	params: {
+	// 		id: doc.deviceId,
+	// 	},
+	// }));
+	// return {
+	// 	paths,
+	// 	fallback: false,
+	// };
+	const paths = [{params:{id:"dummy"}}]
+	return {
+		paths,
+		fallback:false
+	}
 };
 
 export default Page;
