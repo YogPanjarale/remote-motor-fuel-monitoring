@@ -38,7 +38,7 @@ const DashBoard = ({ data }: { data: DeviceDoc }) => {
                     <h1 className="text-lg font-semibold text-white ">Last Seen : {new Date(data.last_seen).toLocaleString()}</h1>
                     
                     </div>
-                    <FuelLevel level={data.json.fuelSensor} deviceId={data.deviceId}/>
+                    <FuelLevel level={data.json.fuelSensor} calibration_table={data.calibration_table}/>
 
                 </div>
 				</div>

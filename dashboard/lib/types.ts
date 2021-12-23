@@ -5,12 +5,23 @@ export interface DeviceDoc {
     json: Json
     ping: string
     switch: string
+    calibration_table: CalibrationTable
   }
-  export interface ErrorResponse {
-    error: string
+  export interface ApiResponse {
+    error?: string
     status: number
+    message?: string
+    data?: DeviceDoc
   }
   
+  export interface CalibrationTable {
+    min: number
+    max: number
+    step: number
+    table:{
+      [key:string]: number
+    }
+  }
   
   export interface Json {
     engineStatus: string

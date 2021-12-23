@@ -1,3 +1,5 @@
+import { ApiResponse, DeviceDoc } from "./types";
+
 const dummy = {
 	_id: "61ae1297048b05f0b53d179e",
 	deviceId: "61646974690a",
@@ -18,16 +20,8 @@ const dummy = {
 	ping: "1",
 	switch: "on",
 };
-const getDevice = async (id: string) => {
-	// const res = await fetch(`/api/device?id=${id}`);
-	// return res.json();
-    if (id=="dummy"){
-
-        return dummy;
-    }
-    return {
-        status:"error",
-        message:"device not found"
-    }
+const getDevice = async (id: string):Promise<ApiResponse> => {
+    const res = await fetch(`/api/device?id=${id}`);
+    return res.json();
 };
 export default getDevice;
