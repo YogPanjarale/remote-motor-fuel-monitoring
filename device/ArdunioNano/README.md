@@ -6,4 +6,4 @@
 
 2. Read Fuel Sensor value (analog)
 
-3. Engine Status (digital)
+3. Water Presence (digital)
