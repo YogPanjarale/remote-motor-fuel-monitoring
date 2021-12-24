@@ -4,7 +4,7 @@ const FuelLevel = ({ level, calibration_table }:{level:number,calibration_table:
     const {value,percentage} = getFuelLiters(level,calibration_table);
     
 	return (
-		<h1 className={`text-lg font-semibold text-gray-800 ${percentage<10?"bg-red-500":percentage<50?"bg-yellow-400":"bg-green-500"} w-min whitespace-nowrap p-1 rounded-md`}>
+		<h1 className={`text-lg font-semibold text-gray-800 ${percentage<20?"bg-red-500":percentage<50?"bg-yellow-400":"bg-green-500"} w-min whitespace-nowrap p-1 rounded-md`}>
 			Fuel level: {value} liters ({percentage}%)  {percentage < 20 ?<span className="bg-white">Low Fuel!!</span>  :"" }
 		</h1>
 	);

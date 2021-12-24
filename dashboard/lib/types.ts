@@ -4,7 +4,7 @@ export interface DeviceDoc {
     last_seen: string
     json: Json
     ping: string
-    switch: string
+    switch: "reset" | "off" | "on"
     calibration_table: CalibrationTable
   }
   export interface ApiResponse {
