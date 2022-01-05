@@ -7,6 +7,13 @@ const int max6675_cs_pin[max6675_num] = {10,9};
 
 SPISettings max6675_spi(1000000, MSBFIRST, SPI_MODE1); //1mhz SPI clock
 
+struct Data
+{
+  int temp_1;
+  int temp_2;
+};
+
+int tempSensorsValues[max6675_num] = {0,0};
 void spiSetup(){
 
   int i;
@@ -54,15 +61,24 @@ void readTemperatures() {
     if (mov_avg[i]==-100) mov_avg[i] = value;
 
     mov_avg[i] = value * mov_avg_alpha +  mov_avg[i] * (1.0 - mov_avg_alpha);
-    Serial.print(round(mov_avg[i]));
-    Serial.print("\t");
-    Serial.println("read");
-
+    // Serial.print(round(mov_avg[i]));
+    // Serial.print("\t");
+    tempSensorsValues[i] = round(mov_avg[i]);
   }
   
   //TODO: read the temperatures from the MAX
 }
 void loop() {
   readTemperatures();
+  //loop over tempSensorsValues and print them
+  int i;
+  for (i = 0; i < (int)max6675_num; i++)
+  {
+    Serial.print("Temp sensor #");
+    Serial.print(i);
+    Serial.print(": ");
+    Serial.print(tempSensorsValues[i]);
+    Serial.print(" °C\n");
+  }
    delay(500);
 }
