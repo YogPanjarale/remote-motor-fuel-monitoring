@@ -1,0 +1,44 @@
+//historical data 
+{
+    "deviceId": "id",
+    "timestamp_start": "2022-01-06T13:14:30.108+00:00",
+    "timestamp_end": "2022-01-07T13:14:30.108+00:00",
+    "engine": {
+        "engineTemp1": {
+            "min": 20,
+            "max": 170
+        },
+        "engineTemp2": {
+            "min": 20,
+            "max": 170
+        },
+        "engineTemp3": {
+            "min": 20,
+            "max": 170
+        },
+        "engineTemp4": {
+            "min": 20,
+            "max": 170
+        },
+        "engineRunningHours": 300,//time it ran in start and end period
+        "lubeOilPressure": {
+            "min": 0,
+            "max": 100
+        },
+        "engineRpm": {
+            "min": 0,
+            "max": 16000
+        }
+    },
+    "fuelLevel": { //in liters
+        "min": 0,
+        "max": 243
+    },
+    "fuelConsumption": 500, //in liters
+    "waterFlowVolumeRate": { // L/hour
+        "min": 50, // minimum for an the hour
+        "max": 100 // minimum for an the hour
+    },
+    "waterFlowVolume": 1000, // L
+    "waterPresentForNoOfHours": 200 // hours
+}

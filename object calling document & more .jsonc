@@ -1,0 +1,83 @@
+// calling object(asset) sample document
+/*
+FOr listing the no of assets in login
+*/
+{
+    "parentId": "id434",
+    "parantName": "name434",
+    "childrensId": "id435",
+    "childrensName": "name435",
+    "assets": [ //an asset is the a device 
+        {
+            "assetId": "id4",
+            "assetName": "name",
+            "assetLocation": "location", //location of the asset
+            "assetDescription": "description",
+            "assetLastUpdated": "2022-01-06T13:14:30.108+00:00"
+        },
+        {
+            "assetId": "id3",
+            "assetName": "name",
+            "assetLocation": "location", //location of the asset
+            "assetDescription": "description",
+            "assetLastUpdated": "2022-01-06T13:14:30.108+00:00"
+        }
+    ],
+    //customour login 4 sites at diff location i site delhi TN , indore,  and one will be parent site
+    //meta data
+    "assetName": "assetName",
+    "engineNo": "49494",
+    "engineModel": "391c3",
+    "equipmentType": "3030",
+    "equipmentNo": "djn23"
+}
+/*
+Parent
+  - Children
+    - Asset (Device)
+
+    suppose asset belongs in 3 city
+
+    parent delhi children noida 4 devices
+    parent(delhi)
+        children(noida)
+            asset(device1)
+            asset(device2)
+            asset(device3)
+            asset(device4)
+    
+    parent gujarat children ahemdabad 4 devices & surat 5 devices
+    parent(gujrat)
+        children(ahemdabad)
+            asset(device5)
+            asset(device6)
+            asset(device7)
+            asset(device8)
+        children(surat)
+            asset(device9)
+            asset(device10)
+            asset(device11)
+            asset(device12)
+            asset(device13)
+    
+    // if user moves device from one city to another then it will be moved to another children/parent
+    // user move 3 devices from surat to new children baroda
+    parent(gujrat)
+        children(ahemdabad)
+            asset(device5)
+            asset(device6)
+            asset(device7)
+            asset(device8)
+        children(surat)
+            asset(device9)
+            asset(device13)
+        children(baroda)
+            asset(device10)
+            asset(device11)
+            asset(device12)
+
+    duplication is possible
+    parent children are folders
+    
+
+*/
