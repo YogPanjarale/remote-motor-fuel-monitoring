@@ -50,6 +50,7 @@ class Device:
             self.temp4 = increase(self.temp4 +random.randint(-5,0),10, 170)
             self.lube_oil_pressure = increase(self.lube_oil_pressure + random.randint(-4,7), 10, 500)
             self.fuel_sensor_level = increase(self.fuel_sensor_level/2 + random.randint(-4,7), 10, 500)
+            self.water_flow_volume_rate_pulse = increase(self.water_flow_volume_rate_pulse + random.randrange(0,10)/10, 15, 25)
         elif self.engine_status == 0:
             self.rpm = decrease(self.rpm, 5, 0)
             self.temp1 = decrease(self.temp1 +random.randint(0, 1),10, 20)
@@ -57,6 +58,7 @@ class Device:
             self.temp3 = decrease(self.temp3 +random.randint(0, 1),10, 20)
             self.temp4 = decrease(self.temp4 +random.randint(0, 1),10, 20)
             self.lube_oil_pressure = decrease(self.lube_oil_pressure, 15, 0)
+            self.water_flow_volume_rate_pulse = decrease(self.water_flow_volume_rate_pulse + random.randrange(0,10)/10, 15, 0)
     def to_json(self):
         doc = {
             "rpm": self.rpm,
