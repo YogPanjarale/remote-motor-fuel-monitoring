@@ -61,6 +61,7 @@ class Device:
             self.water_flow_volume_rate_pulse = decrease(self.water_flow_volume_rate_pulse + random.randrange(0,10)/10, 15, 0)
     def to_json(self):
         doc = {
+            "version":"1.0",
             "rpm": self.rpm,
             "temp1": self.temp1,
             "temp2": self.temp2,
