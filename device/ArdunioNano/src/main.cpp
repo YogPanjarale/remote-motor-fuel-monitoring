@@ -71,14 +71,14 @@ void readTemperatures() {
 void loop() {
   readTemperatures();
   //loop over tempSensorsValues and print them
-  int i;
-  for (i = 0; i < (int)max6675_num; i++)
-  {
-    Serial.print("Temp sensor #");
-    Serial.print(i);
-    Serial.print(": ");
-    Serial.print(tempSensorsValues[i]);
-    Serial.print(" °C\n");
-  }
+  // int i;
+  // for (i = 0; i < (int)max6675_num; i++)
+  // {
+  //   // Serial.print("Temp sensor #");
+  //   // Serial.print(i);
+  //   // Serial.print(": ");
+  //   // Serial.print(" °C\n");
+  // }
+    Serial.println(tempSensorsValues[0]);
    delay(500);
 }
