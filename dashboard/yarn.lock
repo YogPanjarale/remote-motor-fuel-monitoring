@@ -91,6 +91,11 @@
   dependencies:
     "@hapi/hoek" "^9.0.0"
 
+"@influxdata/influxdb-client@^1.21.0":
+  version "1.21.0"
+  resolved "https://registry.yarnpkg.com/@influxdata/influxdb-client/-/influxdb-client-1.21.0.tgz#4d0f10db42daabf84bfa7e58ef22732ff692ad9d"
+  integrity sha512-QdugX4vGFAqO43rTMfPxR4VUrEttXk6X3mZT+edcVOmIXKiJqlg4WCj7eBxJMayAs7RqDIDWRGJVGz7OC497PA==
+
 "@napi-rs/triples@1.0.3":
   version "1.0.3"
   resolved "https://registry.yarnpkg.com/@napi-rs/triples/-/triples-1.0.3.tgz#76d6d0c3f4d16013c61e45dfca5ff1e6c31ae53c"

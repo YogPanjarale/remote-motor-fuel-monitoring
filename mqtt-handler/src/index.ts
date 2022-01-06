@@ -3,13 +3,23 @@ import { Point } from "@influxdata/influxdb-client";
 import writeApi from "./influx_api";
 import { mqtt_client as mqtt } from "./mqtt_client";
 import { JSONDocv1 } from "./type";
+import clientPromise from "./mongodb_client";
+import { Collection, MongoClient } from "mongodb";
+let client: MongoClient;
+let collection: Collection<Document>;
+clientPromise.then((c) => {
+	client = c;
+	console.log("Connected to MongoDB");
+	const db = client!.db("rfms");
+	collection = db.collection("devices");
+});
 
 mqtt.on("connect", () => {
-    console.log("[MQTT] connected");
+	console.log("[MQTT] connected");
 	mqtt.subscribe("rfms/#");
 });
 
-mqtt.on("message", (topic, message) => {
+mqtt.on("message", async (topic, message) => {
 	if (topic.indexOf("rfms/") === 0) {
 		const [deviceId, tag] = topic.substring(5).split("/");
 		if (tag == "json") {
@@ -31,9 +41,16 @@ mqtt.on("message", (topic, message) => {
 					)
 					.floatField("fuel_sensor_level", d.fuel_sensor_level)
 					.intField("engine_switch", d.engine_switch)
-					.intField("engine_status", d.engine_status)
-					.timestamp(new Date());
+					.intField("engine_status", d.engine_status);
 				writeApi.writePoint(point);
+				await writeApi.flush();
+				//putting latest data into mongodb
+				await collection.findOneAndUpdate(
+					{ deviceId: deviceId },
+					{ $set: {timestamp:new Date(),...d} },
+					{ upsert: true }
+				);
+				console.log("[MQTT]", point.toString());
 			}
 		}
 	}

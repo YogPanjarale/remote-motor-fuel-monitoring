@@ -6,6 +6,7 @@
     "start": "next start"
   },
   "dependencies": {
+    "@influxdata/influxdb-client": "^1.21.0",
     "joi": "^17.5.0",
     "mongodb": "^4.2.2",
     "next": "latest",
