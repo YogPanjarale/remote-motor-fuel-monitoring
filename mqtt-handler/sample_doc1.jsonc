@@ -1,0 +1,16 @@
+{
+    "deviceId": "id",
+    "timestamp": "2022-01-06T13:14:30.108+00:00",
+    "engine": {
+        "engineTemp1": 150,
+        "engineTemp2": 150,
+        "engineTemp3": 150,
+        "engineTemp4": 150,
+        "lubeOilPressure": 53,
+        "engineRpm": 4000 // rpm <1800
+    },
+    "fuelLevel": 120, //current volume in liters
+    "waterFlowing": true,
+    "engineRunningHours": 21, //time it since started
+    "waterFlowVolumeRate": 100 // L/hour
+}
