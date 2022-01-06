@@ -10,4 +10,29 @@ const writeApi = client.getWriteApi(org, bucket)
 writeApi.useDefaultTags({host: 'host1'})
 
 const queryApi = client.getQueryApi(org)
-export {writeApi,queryApi};
+
+
+function query (q: string) : Promise<any>  {
+    return new Promise((resolve, reject) => {
+        let result = []
+        queryApi.queryRows(q,{
+            next(row, tableMeta) {
+                const o = tableMeta.toObject(row)
+                result.push(o)
+                console.log(`${o._time} ${o._measurement}: ${o._field}=${o._value}`)
+              },
+              error(error) {
+                console.error(error)
+                console.log('Finished ERROR')
+                reject(error)
+              },
+              complete() {
+                console.log('Finished SUCCESS')
+                resolve(result)
+              },
+
+        })
+    });
+}
+
+export {writeApi,queryApi,query};

@@ -21,8 +21,8 @@ const APIhandler: NextApiHandler = async (req, res) => {
         res.status(404).json({ error: "device not found", status: 404 });
         return;
     }
-   
-
+    const query = ``;
+    // queryApi.
 	res.json({
 		status: "ok",
 		data: {
