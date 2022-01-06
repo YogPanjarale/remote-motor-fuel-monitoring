@@ -1,6 +1,6 @@
 # Remote Fuel Pump Device Simulator
 
-publishes sensor values to mqtt broker every 30 second
+publishes sensor values to mqtt broker every 60 second
 
 ## Tasks
 
