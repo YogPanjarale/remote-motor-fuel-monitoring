@@ -105,8 +105,8 @@ client.connect("do1.yogpanjarale.com", 1883,60 )
 
 ts = time()
 last = 0
-# Run every 1 seconds
-run_every = 1
+# Run every 15 seconds
+run_every = 15
 while True:
     client.loop()
     t = round(time() - ts)
