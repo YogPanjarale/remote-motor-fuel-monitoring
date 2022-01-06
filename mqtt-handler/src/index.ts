@@ -1,86 +1,40 @@
 require("dotenv").config();
-import mqtt from "async-mqtt";
+import { Point } from "@influxdata/influxdb-client";
+import writeApi from "./influx_api";
+import { mqtt_client as mqtt } from "./mqtt_client";
+import { JSONDocv1 } from "./type";
 
-import { MongoClient } from "mongodb";
-import { UnpackJson } from "./utils";
-// console.log("hello")
-
-const client = mqtt.connect("mqtt://do1.yogpanjarale.com:1883", {
-	username: "handler1",
-	password: "Pleaseno",
+mqtt.on("connect", () => {
+    console.log("[MQTT] connected");
+	mqtt.subscribe("rfms/#");
 });
-MongoClient.connect(process.env.MONGO_URL as string).then(
-	async (mongoclient) => {
-		const db = mongoclient.db("rfms");
 
-		const collection = db.collection("devices-mqtt");
-		const events_collection = db.collection("events");
-		const devices = db.collection("devices");
-		const handleMessage: mqtt.OnMessageCallback = async (
-			topic,
-			message
-		) => {
-			const [_root, id, key] = topic.split("/");
-			const data =
-				key == "json"
-					? JSON.parse(message.toString())
-					: message.toString();
-			// if (key !=="json"){
-			// 	console.log(id, key, message.toString());
-			// }
-
-			await devices.findOneAndUpdate(
-				{ deviceId: id },
-				{
-					$set: {
-						last_seen: new Date(),
-						[key]: key == "json" ? UnpackJson(data) : data,
-					},
-				}
-			);
-			switch (key) {
-				case "json":
-					await collection.insertOne({
-						deviceId: id,
-						ts: new Date(),
-						...data,
-					});
-					break;
-				case "fuelFilled":
-					await events_collection.insertOne({
-						deviceId: id,
-						value: data,
-						key: "fuelFilled",
-						ts: new Date(),
-					});
-					break;
-				case "fuelDrained":
-					await events_collection.insertOne({
-						deviceId: id,
-						value: data,
-						key: "fuelFilled",
-						ts: new Date(),
-					});
-					break;
-				case "switch":
-					await events_collection.insertOne({
-						deviceId: id,
-						value: data,
-						key: "switch",
-						ts: new Date(),
-					});
-					break;
-				default:
-					// console.log("default",key)
-					break;
+mqtt.on("message", (topic, message) => {
+	if (topic.indexOf("rfms/") === 0) {
+		const [deviceId, tag] = topic.substring(5).split("/");
+		if (tag == "json") {
+			const data = JSON.parse(message.toString());
+			if (data && data.version == "1.0") {
+				let d: JSONDocv1 = data;
+				let point = new Point("rfms")
+					.tag("deviceId", deviceId)
+					.intField("temp1", d.temp1)
+					.intField("temp2", d.temp2)
+					.intField("temp3", d.temp3)
+					.intField("temp4", d.temp4)
+					.intField("rpm", d.rpm)
+					.intField("lube_oil_pressure", d.lube_oil_pressure)
+					.booleanField("water_presence", d.water_presence)
+					.floatField(
+						"water_flow_volume_rate_pulse",
+						d.water_flow_volume_rate_pulse
+					)
+					.floatField("fuel_sensor_level", d.fuel_sensor_level)
+					.intField("engine_switch", d.engine_switch)
+					.intField("engine_status", d.engine_status)
+					.timestamp(new Date());
+				writeApi.writePoint(point);
 			}
-		};
-
-		client.on("message", handleMessage);
+		}
 	}
-);
-client.on("connect", () => {
-	console.log("connected");
-	client.subscribe("dev-sim/+/+");
 });
-client.on("error", console.error);
