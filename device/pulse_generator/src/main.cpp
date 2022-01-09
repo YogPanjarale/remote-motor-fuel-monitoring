@@ -105,6 +105,13 @@ void setup()
       1,         /* priority of the task */
       NULL,      /* Task handle to keep track of created task */
       1);        /* pin task to core 1 */
+
+    pinMode(2, OUTPUT);
+    digitalWrite(2, HIGH);
+}
+
+BLYNK_CONNECTED() {
+    Blynk.syncVirtual(V0,V1,V2);
 }
 
 BLYNK_WRITE(V0)
