@@ -11,7 +11,7 @@ clientPromise.then((c) => {
 	client = c;
 	console.log("Connected to MongoDB");
 	const db = client!.db("rfms");
-	collection = db.collection("devices");
+	collection = db.collection("devices-latest");
 });
 
 mqtt.on("connect", () => {
