@@ -51,7 +51,7 @@ const Display = ({ data }: { data: Root }) => {
                         <th scope="row">Water Flow Volume Rate</th>
                         <td>{data.waterFlowVolumeRate}</td>
                     </tr>
-                    <tr>
+                    <tr className={data.waterFlowing ? "table-success" : "table-danger"}>
                         <th scope="row">Water Present</th>
                         <td>{data.waterFlowing ? "Yes" : "No"}</td>
                     </tr>
