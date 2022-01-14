@@ -1,7 +1,7 @@
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 
-const views = ["Current Data", "Settings", "History"];
+const views = ["Latest Data", "Settings", "History"];
 // a page with a navbar and 3 tabs
 export default function page({_id,_v}) {
 	const router = useRouter();

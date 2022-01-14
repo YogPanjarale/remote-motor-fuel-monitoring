@@ -15,7 +15,7 @@ const APIhandler: NextApiHandler = async (req, res) => {
 		return;
 	}
 	const client = await clientPromise;
-    const coll = client.db("rfms").collection("devices");
+    const coll = client.db("rfms").collection("device-latest");
     const doc :WithId<Document> = await coll.findOne({ deviceId: id });
     if (!doc) {
         res.status(404).json({ error: "device not found", status: 404 });
