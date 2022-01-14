@@ -1,3 +1,4 @@
+import { CurrentData } from "$components/current_data";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 
@@ -40,20 +41,7 @@ export default function page({_id,_v}) {
 						))}
 					</ul>
 				</nav>
-				<div className="container col py-2">
-					<div className="col-md-9">
-						<div className="card">
-							<div className="card-body">
-								<h5 className="card-title">Card title</h5>
-								<p className="card-text">
-									Some quick example text to build on the card
-									title and make up the bulk of the card's
-									content.
-								</p>
-							</div>
-						</div>
-					</div>
-				</div>
+				<CurrentData id={id} />
 			</div>
 		</div>
 	);
@@ -63,7 +51,7 @@ export const getServerSideProps = async (ctx) => {
     return {
         props: {
             _id: id,
-            _v : view
+            _v : view||1
         }
     };
 };
