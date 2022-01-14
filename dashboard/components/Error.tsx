@@ -1,3 +1,5 @@
+//tailwind
+import 'tailwindcss/tailwind.css'
 const ErrorPage = ({ statusCode,message }) => {
     return (
         <div className="h-screen flex flex-col justify-center items-center text-center">
