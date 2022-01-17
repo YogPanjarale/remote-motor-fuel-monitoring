@@ -1,30 +1,58 @@
-# Smart fuel pump Monitoring & Control solution (sfmc)
+# remote water pump management system
 
-## From Device
+## Tasks
 
-parameter to monitor and control:
+Engine
 
-> Engine
+- [ ] engine temperature sensors x3 + vacuum pump temp x1  (SPI) x4
+- [ ] engine RPM (pulse) x1
+- [ ] engine running hours (counter)
 
-- Engine RPM
-- Engine Temperature Sensor 1,2,3
-- Vaccum Temperature Sensor 4
-- Lube Oil Pressure Sensor
+Fuel
 
-> Water
+- [ ] fuel pump sensor (ADC) x1
+- [ ] fuel volume <10% (alert)
+- [ ] fuel filling quantity (counter)
+- [ ] fuel draining quantity (counter)
 
-- Water Presence Sensor
-- Water Flow Sensor
+Water
 
-> Fuel
+- [ ] water presence sensor (INPUT) x1
+- [ ] No Water flow / dry run (boolean)
+- [ ] water flow rate sensor (pulse/RS485) x1
+- [ ] water flow volume (counter)
 
-- Fuel Volume(Level) Sensor
+Control
 
-> Engine
+- [ ] Engine On & Off (boolean)
+- [ ] Self engine off , dry run > user defined time
+- [ ] Self engine off , low fuel
+- [ ] Self Engine OFF, Engine operated more than a limit
+- [ ] Self Engine OFF , Engine temp critical high
 
-- Engine Motor Pump ( Control )
-- Engine Motor Pump ( Status )
+## Device
 
-## Backend Part
+for device part we need to
 
-- engine on / off events
+Engine-
+
+- [ ] read & send 4 temp sensors value through mqtt
+`SPI sensors`
+- [ ] measure & send Engine RPM value through mqtt
+`pulse input`
+
+Fuel-
+
+- [ ] read & send fuel sensor reading value through mqtt
+`ADC input`
+
+Water-
+
+- [ ] read & send water presence sensor value through mqtt
+`digital INPUT input`
+- [ ] measure & send water flow sensor reading value through mqtt
+`pulse input`
+
+Control-
+
+- [ ] capture & action upon receiving commands for engine on/off from mqtt
