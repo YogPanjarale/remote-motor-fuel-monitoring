@@ -1,6 +1,6 @@
-# remote water pump management system
+# Remote water pump management system
 
-## Tasks
+## Parameters 
 
 Engine
 
