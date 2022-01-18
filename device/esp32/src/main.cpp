@@ -2,6 +2,7 @@
 #include <Arduino.h>
 #include "EspMQTTClient.h"
 #include <GyverMAX6675_SPI.h>
+#include <SSD1306Wire.h>
 #include <ArduinoJson.h>
 #include "properties.h"
 
@@ -10,14 +11,14 @@ String DeviceID = DeviceID;
 EspMQTTClient client(WIFI_SSID, WIFI_PASSWORD, MQTT_SERVER_IP, MQTT_USERNAME, MQTT_PASSWORD, MQTT_CLIENT_NAME, MQTT_SERVER_PORT);
 
 // Engine Stuff
-GyverMAX6675_SPI<10> temp1;
-GyverMAX6675_SPI<11> temp2;
-GyverMAX6675_SPI<12> temp3;
-GyverMAX6675_SPI<13> temp4;
+GyverMAX6675_SPI<14> temp1;
+GyverMAX6675_SPI<15> temp2;
+GyverMAX6675_SPI<16> temp3;
+GyverMAX6675_SPI<17> temp4;
 
-const byte engineRPM_pin = 14;
+const byte engineRPM_pin = 18;
 
-const byte engineRelay_pin = 15;
+const byte engineRelay_pin = 19;
 struct EngineData
 {
   short int temp1 = 0;
@@ -43,8 +44,8 @@ void readEngineData()
 }
 
 // Water Pump Stuff
-const byte waterPresence_pin = 16;
-const byte waterFlowRate_pin = 17;
+const byte waterPresence_pin = 20;
+const byte waterFlowRate_pin = 32;
 
 struct WaterData
 {
@@ -61,7 +62,7 @@ void readWaterData()
 }
 
 // Fuel Stuff
-const byte fuelSensor_pin = 18;
+const byte fuelSensor_pin = 33;
 
 short int fuelSensorReading = 0;
 
@@ -70,6 +71,13 @@ void readFuelData()
   fuelSensorReading = analogRead(fuelSensor_pin);
 }
 
+void setupPinModes(){
+  pinMode(engineRPM_pin, INPUT);//18
+  pinMode(engineRelay_pin, OUTPUT);//19
+  pinMode(waterPresence_pin, INPUT);//20
+  pinMode(waterFlowRate_pin, INPUT);//32
+  pinMode(fuelSensor_pin, INPUT);//33
+}
 //read all data task
 void readAllData(void *pvParameters)
 {
@@ -82,7 +90,17 @@ void readAllData(void *pvParameters)
   }
 }
 
-
+void onEngineSwitch(String payload)
+{
+  if (payload == "true")
+  {
+    digitalWrite(engineRelay_pin, HIGH);
+  }
+  else
+  {
+    digitalWrite(engineRelay_pin, LOW);
+  }
+}
 // publish data
 void publishmqtt()
 {
@@ -99,9 +117,13 @@ void publishmqtt()
 
   doc["fuel"]["reading"] = fuelSensorReading;
 
+  // print("Publishing...");
   String json;
   serializeJson(doc, json);
-  client.publish(DeviceID, json);
+  String topic =MQTT_ROOT;
+  topic += "/" + DeviceID;
+  topic += "/data";
+  client.publish(topic, json);
 
 }
 
@@ -129,45 +151,44 @@ void setup()
   Serial.begin(115200);
   client.enableDebuggingMessages(); // Enable debugging messages sent to serial output
   client.enableHTTPWebUpdater();
-  client.enableOTA();                                                     // Enable OTA (Over The Air) updates. Password defaults to MQTTPassword. Port is the default OTA port. Can be overridden with enableOTA("password", port).
-  String lastWillTopic = DeviceID + String("/last");                      // Last will topic
-  client.enableLastWillMessage(lastWillTopic.c_str(), "unexpected exit"); // You can activate the retain flag by setting the third parameter to true
-  xTaskCreate(
-      readAllData,
-      "readAllData",
-      10000,
-      NULL,
-      1,
-      NULL);
-  xTaskCreate(
-    publishmqtt_loop,
-    "publishmqtt_loop",
-    10000,
-    NULL,
-    1,
-    NULL);
-  xTaskCreate(
-    mqtt_task,
-    "mqtt_task",
-    10000,
-    NULL,
-    1,
-    NULL);
+  client.enableOTA();
+  char topic[100];
+  sprintf(topic,"%s/%s/logs",MQTT_ROOT,DeviceID.c_str());// Last will topic
+  const char *lastWillTopicc = topic;
+  client.enableLastWillMessage(lastWillTopicc, "unexpected disconnect"); // You can activate the retain flag by setting the third parameter to true
+  setupPinModes();
+  // display.init();
+  // display.flipScreenVertically();
+  // display.setFont(ArialMT_Plain_10);
+
+  // print("Starting...");
+  // xTaskCreate(readAllData,"readAllData",1000,NULL,1,NULL);
+  // xTaskCreate(publishmqtt_loop,"publishmqtt_loop",1000,NULL,1,NULL);
+  // xTaskCreate(mqtt_task,"mqtt_task",5000,NULL,1,NULL);
   
 }
 
 // This function is called once everything is connected (Wifi and MQTT)
 void onConnectionEstablished()
-{
-  client.subscribe(DeviceID + String("/test"), [](const String &payload)
-                   { Serial.println(payload); });
+{ 
+  // print("MQTT Connected");
+  String topic = MQTT_ROOT;
+  topic += "/" + DeviceID;
+  client.publish(topic+"/logs", "connected");
+  client.subscribe(topic+"/switch",onEngineSwitch);
 
-  client.subscribe(DeviceID + String("/wildcardtest/#"), [](const String &topic, const String &payload)
-                   { Serial.println("(From wildcard) topic: " + topic + ", payload: " + payload); });
-  client.publish(DeviceID + String("/test"), "This is a message");
 }
 
 
+long lastPublished = 0;
 void loop()
 {
+  readAllData(NULL);
+  if (millis() - lastPublished > 5000)
+  {
+    publishmqtt();
+    lastPublished = millis();
+  }
+  client.loop();
+  delay(50);
 }
