@@ -1,4 +1,3 @@
-
 #include <Arduino.h>
 #include "EspMQTTClient.h"
 #include <GyverMAX6675_SPI.h>
@@ -149,6 +148,7 @@ void mqtt_task(void *pvParameters)
 void setup()
 {
   Serial.begin(115200);
+
   client.enableDebuggingMessages(); // Enable debugging messages sent to serial output
   client.enableHTTPWebUpdater();
   client.enableOTA();
@@ -169,6 +169,7 @@ void setup()
 }
 
 // This function is called once everything is connected (Wifi and MQTT)
+// WARNING : YOU MUST IMPLEMENT IT IF YOU USE EspMQTTClient
 void onConnectionEstablished()
 { 
   // print("MQTT Connected");
@@ -182,6 +183,7 @@ void onConnectionEstablished()
 
 long lastPublished = 0;
 void loop()
+  // put your main code here, to run repeatedly:	
 {
   readAllData(NULL);
   if (millis() - lastPublished > 5000)
