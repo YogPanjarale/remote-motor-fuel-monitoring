@@ -1,173 +1,112 @@
-
-#include <Arduino.h>
 #include "EspMQTTClient.h"
-#include <GyverMAX6675_SPI.h>
-#include <ArduinoJson.h>
-#include "properties.h"
+// #include "properties.h"
+#include <GyverMAX6675.h>
 
-String DeviceID = DeviceID;
+EspMQTTClient client(
+    "PANJARALE_HOSPITAL",
+    "12031975",
+    "do1.yogpanjarale.com", // MQTT Broker server ip
+    "esp0x001",             // MQTT USERNAME
+    "Pleaseno",             // MQTT USERNAME
+    "wifi-esp-0x001"        // MQTT Client Id
+);
 
-EspMQTTClient client(WIFI_SSID, WIFI_PASSWORD, MQTT_SERVER_IP, MQTT_USERNAME, MQTT_PASSWORD, MQTT_CLIENT_NAME, MQTT_SERVER_PORT);
+// Temp sensors
+#define CLK SCK
+#define SO MISO
 
-// Engine Stuff
-GyverMAX6675_SPI<10> temp1;
-GyverMAX6675_SPI<11> temp2;
-GyverMAX6675_SPI<12> temp3;
-GyverMAX6675_SPI<13> temp4;
+GyverMAX6675<CLK, SO, 27> temp1;
+GyverMAX6675<CLK, SO, 26> temp2;
+GyverMAX6675<CLK, SO, 25> temp3;
+GyverMAX6675<CLK, SO, 33> temp4;
 
-const byte engineRPM_pin = 14;
+// engine RPM pin
+#define engineRPMpin 32
+// fuel sensor
+#define fuelSensorADC  35
+// water
+#define waterPresence 34
 
-const byte engineRelay_pin = 15;
-struct EngineData
+unsigned long lastRead = 0;
+int rpmValue = 0;
+
+void rpmInterrupt()
 {
-  short int temp1 = 0;
-  short int temp2 = 0;
-  short int temp3 = 0;
-  short int temp4 = 0;
-  short int rpm = 0;
-  boolean status = false;
-};
-
-struct EngineData engineData;
-void readEngineData()
-{
-  engineData.temp1 = temp1.getTempInt();
-  engineData.temp2 = temp2.getTempInt();
-  engineData.temp3 = temp3.getTempInt();
-  engineData.temp4 = temp4.getTempInt();
-  // calculating rpm
-  const int onesecond = 1000 * 1000; // second in microseconds
-  const int duration = pulseIn(engineRPM_pin, HIGH, onesecond * 5);
-  engineData.rpm = (duration / onesecond) * 60;
-  engineData.status = digitalRead(engineRelay_pin);
+  unsigned long currentMillis = millis();
+  unsigned long delta = currentMillis - lastRead;
+  // Serial.print("delta: ");
+  // Serial.println(delta);
+  rpmValue = 60000/delta; 
+  lastRead = millis(); 
 }
-
-// Water Pump Stuff
-const byte waterPresence_pin = 16;
-const byte waterFlowRate_pin = 17;
-
-struct WaterData
-{
-  boolean presence = false;
-  short int flowRate = 0;
-};
-
-WaterData waterData;
-void readWaterData()
-{
-  waterData.presence = digitalRead(waterPresence_pin);
-  const int duration = pulseIn(waterFlowRate_pin, HIGH, 1000 * 1000);
-  waterData.flowRate = (duration / 1000 * 1000) * 60;
-}
-
-// Fuel Stuff
-const byte fuelSensor_pin = 18;
-
-short int fuelSensorReading = 0;
-
-void readFuelData()
-{
-  fuelSensorReading = analogRead(fuelSensor_pin);
-}
-
-//read all data task
-void readAllData(void *pvParameters)
-{
-  while (1)
-  {
-    readEngineData();
-    readWaterData();
-    readFuelData();
-    vTaskDelay(1000 / portTICK_PERIOD_MS);
-  }
-}
-
-
-// publish data
-void publishmqtt()
-{
-  DynamicJsonDocument doc(1024);
-  doc["engine"]["temp1"] = engineData.temp1;
-  doc["engine"]["temp2"] = engineData.temp2;
-  doc["engine"]["temp3"] = engineData.temp3;
-  doc["engine"]["temp4"] = engineData.temp4;
-  doc["engine"]["rpm"] = engineData.rpm;
-  doc["engine"]["status"] = engineData.status;
-
-  doc["water"]["presence"] = waterData.presence;
-  doc["water"]["flowRate"] = waterData.flowRate;
-
-  doc["fuel"]["reading"] = fuelSensorReading;
-
-  String json;
-  serializeJson(doc, json);
-  client.publish(DeviceID, json);
-
-}
-
-void publishmqtt_loop(void *pvParameters)
-{
-  while (1)
-  {
-    publishmqtt();
-    vTaskDelay(5000 / portTICK_PERIOD_MS);
-  }
-}
-
-//mqtt task
-void mqtt_task(void *pvParameters)
-{
-  while (1)
-  {
-  client.loop();
-  vTaskDelay(100 / portTICK_PERIOD_MS);
-  }
   
+String update()
+{
+
+  // temp sensors
+  int t1 = temp1.getTemp();
+  int t2 = temp2.getTemp();
+  int t3 = temp3.getTemp();
+  int t4 = temp4.getTemp();
+  // int t1, t2, t3, t4;
+  // t1=0;t2=0;t3=0;t4=0;
+
+  // engine rpm
+  int rpm =0;
+  if (millis()-lastRead<5000)
+    rpm = rpmValue;
+  if (rpm<1) rpm=0;
+  // int rpm = 0;
+  char buffer[256];
+  sprintf(buffer, "{'engine':{'temp1':%i,'temp2':%i,'temp3':%i,'temp4':%i,'rpm':%i}}", t1, t2, t3, t4, rpm);
+  return String(buffer);
 }
+
 void setup()
 {
   Serial.begin(115200);
-  client.enableDebuggingMessages(); // Enable debugging messages sent to serial output
-  client.enableHTTPWebUpdater();
-  client.enableOTA();                                                     // Enable OTA (Over The Air) updates. Password defaults to MQTTPassword. Port is the default OTA port. Can be overridden with enableOTA("password", port).
-  String lastWillTopic = DeviceID + String("/last");                      // Last will topic
-  client.enableLastWillMessage(lastWillTopic.c_str(), "unexpected exit"); // You can activate the retain flag by setting the third parameter to true
-  xTaskCreate(
-      readAllData,
-      "readAllData",
-      10000,
-      NULL,
-      1,
-      NULL);
-  xTaskCreate(
-    publishmqtt_loop,
-    "publishmqtt_loop",
-    10000,
-    NULL,
-    1,
-    NULL);
-  xTaskCreate(
-    mqtt_task,
-    "mqtt_task",
-    10000,
-    NULL,
-    1,
-    NULL);
-  
+
+  // Optional functionalities of EspMQTTClient
+  client.enableDebuggingMessages();                                      // Enable debugging messages sent to serial output
+  client.enableHTTPWebUpdater();                                         // Enable the web updater. User and password default to values of MQTTUsername and MQTTPassword. These can be overridded with enableHTTPWebUpdater("user", "password").
+  client.enableOTA();                                                    // Enable OTA (Over The Air) updates. Password defaults to MQTTPassword. Port is the default OTA port. Can be overridden with enableOTA("password", port).
+  client.enableLastWillMessage("devices/0x001/status", "offline", true); // You can activate the retain flag by setting the third parameter to true
+  client.setKeepAlive(10);
+
+  // setup pins
+  pinMode(engineRPMpin, INPUT);
+  pinMode(fuelSensorADC, INPUT);
+  pinMode(waterPresence, INPUT);
+
+  // attach intterupts to engineRPMpin
+  attachInterrupt(digitalPinToInterrupt(engineRPMpin), rpmInterrupt, HIGH);
 }
 
 // This function is called once everything is connected (Wifi and MQTT)
 void onConnectionEstablished()
 {
-  client.subscribe(DeviceID + String("/test"), [](const String &payload)
-                   { Serial.println(payload); });
+  String base = "devices/0x001";
+  // Subscribe to "mytopic/test" and display received message to Serial
+  client.subscribe(base + "/engineSwitch", [](const String &payload)
+   { Serial.println(payload); });
 
-  client.subscribe(DeviceID + String("/wildcardtest/#"), [](const String &topic, const String &payload)
-                   { Serial.println("(From wildcard) topic: " + topic + ", payload: " + payload); });
-  client.publish(DeviceID + String("/test"), "This is a message");
+  client.subscribe(base + "/update", [base](const String &payload)
+   {
+  Serial.print("[Update]");
+  Serial.println(payload);
+  String buffer = update();
+  client.publish(base+"/data",buffer);
+  });
+  client.subscribe(base + "/ping", [base](const String &payload)
+  {
+  Serial.println("[PING] : pong");
+  client.publish(base+"/pong","pong");
+  });
+  client.publish(base + "/status", "online", true);
 }
-
 
 void loop()
 {
+  client.loop();
+  delay(50);
 }
