@@ -32,31 +32,35 @@ void setup()
   client.enableDebuggingMessages(); // Enable debugging messages sent to serial output
   client.enableHTTPWebUpdater(); // Enable the web updater. User and password default to values of MQTTUsername and MQTTPassword. These can be overridded with enableHTTPWebUpdater("user", "password").
   client.enableOTA(); // Enable OTA (Over The Air) updates. Password defaults to MQTTPassword. Port is the default OTA port. Can be overridden with enableOTA("password", port).
-  client.enableLastWillMessage("devices/0x001/status", "offline");  // You can activate the retain flag by setting the third parameter to true
+  client.enableLastWillMessage("devices/0x001/status", "offline",true);  // You can activate the retain flag by setting the third parameter to true
+  
 }
 
 // This function is called once everything is connected (Wifi and MQTT)
 void onConnectionEstablished()
 {
-String base =   "devices/0x001"
+  String base = String("devices/0x001");
   // Subscribe to "mytopic/test" and display received message to Serial
-  client.subscribe(base+"/engineSwitch", [](const String & payload) {
+  client.subscribe(String(base+"/engineSwitch"), [](const String & payload) {
     Serial.println(payload);
   });
   
-  client.subscribe(base+"/update",[](const String & payload){
+  client.subscribe(String(base+"/update"),[base](const String & payload){
     Serial.print("[Update]");
     Serial.println(payload);
     int t1 = temp1.getTemp();
     int t2 = temp2.getTemp();
     int t3 = temp3.getTemp();
     int t4 = temp4.getTemp();
-    char[1024] buffer;    
+    char buffer[256];    
     sprintf(buffer,"{'engine':{'temp1':%i,'temp2':%i,'temp3':%i,'temp4':%i}}",t1,t2,t3,t4);
     client.publish(base+"/data",buffer);
   });
- 
-  client.publish(base+"/status","online");
+ client.subscribe(String(base+"/ping"),[base](const String & payload){
+   Serial.println("[PING] : pong");
+   client.publish(base+"/pong","pong");
+ });
+  client.publish(base+"/status","online",true);
   }
 
 void loop()
