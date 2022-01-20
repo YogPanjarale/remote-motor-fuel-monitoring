@@ -1,5 +1,5 @@
 #include "EspMQTTClient.h"
-#include "properties.h"
+// #include "properties.h"
 #include <GyverMAX6675.h>
 
 EspMQTTClient client(
@@ -12,19 +12,55 @@ EspMQTTClient client(
 );
 
 // Temp sensors
-#define CLK 18
-#define SO 19
+#define CLK SCK
+#define SO MISO
 
 GyverMAX6675<CLK, SO, 27> temp1;
 GyverMAX6675<CLK, SO, 26> temp2;
 GyverMAX6675<CLK, SO, 25> temp3;
 GyverMAX6675<CLK, SO, 33> temp4;
 
-byte engineRPMpin = 32;
+// engine RPM pin
+#define engineRPMpin 32
 // fuel sensor
-byte fuelSensorADC = 35;
+#define fuelSensorADC  35
 // water
-byte waterPresence = 34;
+#define waterPresence 34
+
+unsigned long lastRead = 0;
+int rpmValue = 0;
+
+void rpmInterrupt()
+{
+  unsigned long currentMillis = millis();
+  unsigned long delta = currentMillis - lastRead;
+  // Serial.print("delta: ");
+  // Serial.println(delta);
+  rpmValue = 60000/delta; 
+  lastRead = millis(); 
+}
+  
+String update()
+{
+
+  // temp sensors
+  int t1 = temp1.getTemp();
+  int t2 = temp2.getTemp();
+  int t3 = temp3.getTemp();
+  int t4 = temp4.getTemp();
+  // int t1, t2, t3, t4;
+  // t1=0;t2=0;t3=0;t4=0;
+
+  // engine rpm
+  int rpm =0;
+  if (millis()-lastRead<5000)
+    rpm = rpmValue;
+  if (rpm<1) rpm=0;
+  // int rpm = 0;
+  char buffer[256];
+  sprintf(buffer, "{'engine':{'temp1':%i,'temp2':%i,'temp3':%i,'temp4':%i,'rpm':%i}}", t1, t2, t3, t4, rpm);
+  return String(buffer);
+}
 
 void setup()
 {
@@ -37,8 +73,13 @@ void setup()
   client.enableLastWillMessage("devices/0x001/status", "offline", true); // You can activate the retain flag by setting the third parameter to true
   client.setKeepAlive(10);
 
-  // setup pin modes
+  // setup pins
   pinMode(engineRPMpin, INPUT);
+  pinMode(fuelSensorADC, INPUT);
+  pinMode(waterPresence, INPUT);
+
+  // attach intterupts to engineRPMpin
+  attachInterrupt(digitalPinToInterrupt(engineRPMpin), rpmInterrupt, HIGH);
 }
 
 // This function is called once everything is connected (Wifi and MQTT)
@@ -47,33 +88,19 @@ void onConnectionEstablished()
   String base = "devices/0x001";
   // Subscribe to "mytopic/test" and display received message to Serial
   client.subscribe(base + "/engineSwitch", [](const String &payload)
-                   { Serial.println(payload); });
+   { Serial.println(payload); });
 
   client.subscribe(base + "/update", [base](const String &payload)
-                   {
-    Serial.print("[Update]");
-    Serial.println(payload);
-
-    // temp sensors
-    int t1 = temp1.getTemp();
-    int t2 = temp2.getTemp();
-    int t3 = temp3.getTemp();
-    int t4 = temp4.getTemp();
-
-    // engine rpm
-
-    long duration_micro = pulseIn(engineRPMpin,digitalRead(engineRPMpin)==HIGH?LOW:HIGH,1*1000*1000);//read the time it takes (in microseconds) to be the inverse of current pin state with a timeout of 1 second 
-
-    int timerrevCalc = duration_micro * 50.7801; //See above
-    int rpm = 60000000/timerrevCalc; 
-    char buffer[256];
-    sprintf(buffer,"{'engine':{'temp1':%i,'temp2':%i,'temp3':%i,'temp4':%i,'rpm':%i}}",t1,t2,t3,t4,rpm);
-    client.publish(base+"/data",buffer); 
+   {
+  Serial.print("[Update]");
+  Serial.println(payload);
+  String buffer = update();
+  client.publish(base+"/data",buffer);
   });
   client.subscribe(base + "/ping", [base](const String &payload)
   {
-      Serial.println("[PING] : pong");
-      client.publish(base+"/pong","pong"); 
+  Serial.println("[PING] : pong");
+  client.publish(base+"/pong","pong");
   });
   client.publish(base + "/status", "online", true);
 }
@@ -81,6 +108,5 @@ void onConnectionEstablished()
 void loop()
 {
   client.loop();
-  
-  delay(100);
+  delay(50);
 }
