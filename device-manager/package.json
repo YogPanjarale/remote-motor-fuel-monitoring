@@ -1,7 +1,7 @@
 {
-  "name": "~TODO~",
+  "name": "device-manager",
   "version": "1.0.0",
-  "description": "",
+  "description": "rfms device manager",
   "main": "index.js",
   "scripts": {
     "watch": "tsc -w",
@@ -19,6 +19,5 @@
     "nodemon": "^2.0.4",
     "typescript": "^3.9.7"
   },
-  "dependencies": {
-  }
+  "dependencies": {}
 }
