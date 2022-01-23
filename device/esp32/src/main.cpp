@@ -56,9 +56,15 @@ String update()
   if (millis()-lastRead<5000)
     rpm = rpmValue;
   if (rpm<1) rpm=0;
+
+  //fuel sensor
+  int fuelSensorReading = analogRead(fuelSensorADC); 
+  int voltage_value =map(fuelSensorReading, 0, 4095, 0, 500);
+  int fuelV = voltage_value*2;
   // int rpm = 0;
+  Serial.println(fuelV);
   char buffer[256];
-  sprintf(buffer, "{'engine':{'temp1':%i,'temp2':%i,'temp3':%i,'temp4':%i,'rpm':%i}}", t1, t2, t3, t4, rpm);
+  sprintf(buffer, "{'engine':{'temp1':%i,'temp2':%i,'temp3':%i,'temp4':%i,'rpm':%i},'fuel':{'sensor':%i}}", t1, t2, t3, t4, rpm,fuelV);
   return String(buffer);
 }
 
