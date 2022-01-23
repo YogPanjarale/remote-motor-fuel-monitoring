@@ -25,7 +25,10 @@ GyverMAX6675<CLK, SO, 33> temp4;
 // fuel sensor
 #define fuelSensorADC  35
 // water
-#define waterPresence 34
+#define waterPresence 20
+
+//engine control
+#define engineSolenoidControl 34
 
 unsigned long lastRead = 0;
 int rpmValue = 0;
@@ -38,6 +41,11 @@ void rpmInterrupt()
   // Serial.println(delta);
   rpmValue = 60000/delta; 
   lastRead = millis(); 
+}
+int readWaterFlow()
+{
+  //TODO: implement with rs485
+  return 0;
 }
   
 String update()
@@ -58,13 +66,22 @@ String update()
   if (rpm<1) rpm=0;
 
   //fuel sensor
-  int fuelSensorReading = analogRead(fuelSensorADC); 
-  int voltage_value =map(fuelSensorReading, 0, 4095, 0, 500);
+  int fuelSensorReading = analogRead(fuelSensorADC);
+  int refVoltage = 326;//TODO : calculate ref voltage if esp
+  int voltage_value =map(fuelSensorReading, 0, 4095, 0, refVoltage);
+  Serial.printf("reading : %i ;voltage %i \n",fuelSensorReading,voltage_value);
   int fuelV = voltage_value*2;
+
+  // water
+  int water = digitalRead(waterPresence);
+  bool water_presence = (water == HIGH);
+  int waterFlow = readWaterFlow();
+
   // int rpm = 0;
   Serial.println(fuelV);
   char buffer[256];
-  sprintf(buffer, "{'engine':{'temp1':%i,'temp2':%i,'temp3':%i,'temp4':%i,'rpm':%i},'fuel':{'sensor':%i}}", t1, t2, t3, t4, rpm,fuelV);
+  sprintf(buffer, "{\"engine\":{\"temp1\":%i,\"temp2\":%i,\"temp3\":%i,\"temp4\":%i,\"rpm\":%i},\"fuel\":{\"sensor\":%i},\"water\":{\"present\":%i,\"flow\":%i}}", t1, t2, t3, t4, rpm,fuelV,water_presence,waterFlow);
+
   return String(buffer);
 }
 
@@ -94,7 +111,13 @@ void onConnectionEstablished()
   String base = "devices/0x001";
   // Subscribe to "mytopic/test" and display received message to Serial
   client.subscribe(base + "/engineSwitch", [](const String &payload)
-   { Serial.println(payload); });
+   { Serial.println(payload);
+    if (payload=="1"){
+      digitalWrite(engineSolenoidControl,HIGH);
+    }else if (payload=="0"){
+      digitalWrite(engineSolenoidControl,LOW);
+    }
+    });
 
   client.subscribe(base + "/update", [base](const String &payload)
    {
@@ -111,8 +134,11 @@ void onConnectionEstablished()
   client.publish(base + "/status", "online", true);
 }
 
+// unsigned long last_logged=0;
 void loop()
 {
-  client.loop();
-  delay(50);
+  // client.loop();
+    Serial.println("update"); 
+    Serial.println(update());
+  delay(1000);
 }

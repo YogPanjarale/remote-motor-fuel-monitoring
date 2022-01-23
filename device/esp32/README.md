@@ -56,3 +56,4 @@ Water-
 Control-
 
 - [ ] capture & action upon receiving commands for engine on/off from mqtt
+- [ ] engine solonoid status
