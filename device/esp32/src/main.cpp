@@ -1,6 +1,8 @@
 #include "EspMQTTClient.h"
 // #include "properties.h"
 #include <GyverMAX6675.h>
+#define DEBUG
+// #define OFFLINE
 
 EspMQTTClient client(
     "PANJARALE_HOSPITAL",
@@ -25,10 +27,10 @@ GyverMAX6675<CLK, SO, 33> temp4;
 // fuel sensor
 #define fuelSensorADC  35
 // water
-#define waterPresence 20
+#define waterPresence 34
 
 //engine control
-#define engineSolenoidControl 34
+#define engineSolenoidControl 13
 
 unsigned long lastRead = 0;
 int rpmValue = 0;
@@ -121,9 +123,11 @@ void onConnectionEstablished()
 
   client.subscribe(base + "/update", [base](const String &payload)
    {
+     
   Serial.print("[Update]");
   Serial.println(payload);
   String buffer = update();
+  Serial.println(buffer);
   client.publish(base+"/data",buffer);
   });
   client.subscribe(base + "/ping", [base](const String &payload)
@@ -138,7 +142,11 @@ void onConnectionEstablished()
 void loop()
 {
   // client.loop();
+  #ifdef OFFLINE
     Serial.println("update"); 
     Serial.println(update());
-  delay(1000);
+    delay(1000);
+  #else
+    client.loop();
+  #endif
 }
