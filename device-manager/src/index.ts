@@ -1,15 +1,11 @@
-import * as mqtt from "mqtt"; // import everything inside the mqtt module and give it the namespace "mqtt"
-import { AsyncClient } from "async-mqtt";
-const client = mqtt.connect("mqtt://do1.yogpanjarale.com:1883", {
-	clientId: "my-client-id",
-	username: "dev-man-",
-	password: "Pleaseno",
-});
-const asyncClient = new AsyncClient(client);
-const branch = "0x"
+import config from "./config";
+import { messageHandler } from "./messageHandler";
+import { asyncClient, client } from "./mqtt-client";
+const branch = config.branch;
 const devices = ["001"]
+
 async function main() {
-    await asyncClient.publish("Hello/Wolrd","stuff")
+    await asyncClient.publish(`devices/${branch}/status`,'online');
     asyncClient.subscribe(`devices/${branch}/#`)
 }
 setInterval(() => {
@@ -17,9 +13,5 @@ setInterval(() => {
         await asyncClient.publish(`devices/${branch}/${device}/update`, "1")
     })
 }, 5000);
-client.on("message", function (topic, message) {
-	// message is Buffer
-	console.log(`[Incomming message] : ${topic} , ${message.toString()}`);
-	// client.end();
-});
+client.on("message", messageHandler);
 main();
