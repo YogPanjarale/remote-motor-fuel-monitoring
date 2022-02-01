@@ -67,10 +67,14 @@ String update()
     rpm = rpmValue;
   if (rpm<1) rpm=0;
 
+  int engineSwitch = digitalRead(engineSolenoidControl);
+
   //fuel sensor
+  
   int fuelSensorReading = analogRead(fuelSensorADC);
   int refVoltage = 326;//TODO : calculate ref voltage if esp
   int voltage_value =map(fuelSensorReading, 0, 4095, 0, refVoltage);
+  // int voltage_value = analogReadMilliVolts(fuelSensorADC);
   Serial.printf("reading : %i ;voltage %i \n",fuelSensorReading,voltage_value);
   int fuelV = voltage_value*2;
 
@@ -82,7 +86,7 @@ String update()
   // int rpm = 0;
   Serial.println(fuelV);
   char buffer[256];
-  sprintf(buffer, "{\"engine\":{\"temp1\":%i,\"temp2\":%i,\"temp3\":%i,\"temp4\":%i,\"rpm\":%i},\"fuel\":{\"sensor\":%i},\"water\":{\"present\":%i,\"flow\":%i}}", t1, t2, t3, t4, rpm,fuelV,water_presence,waterFlow);
+  sprintf(buffer, "{\"engine\":{\"temp1\":%i,\"temp2\":%i,\"temp3\":%i,\"temp4\":%i,\"rpm\":%i,\"solenoid\":%i},\"fuel\":{\"sensor\":%i},\"water\":{\"present\":%i,\"flow\":%i}}", t1, t2, t3, t4, rpm,engineSwitch,fuelV,water_presence,waterFlow);
 
   return String(buffer);
 }
@@ -95,13 +99,14 @@ void setup()
   client.enableDebuggingMessages();                                      // Enable debugging messages sent to serial output
   client.enableHTTPWebUpdater();                                         // Enable the web updater. User and password default to values of MQTTUsername and MQTTPassword. These can be overridded with enableHTTPWebUpdater("user", "password").
   client.enableOTA();                                                    // Enable OTA (Over The Air) updates. Password defaults to MQTTPassword. Port is the default OTA port. Can be overridden with enableOTA("password", port).
-  client.enableLastWillMessage("devices/0x001/status", "offline", true); // You can activate the retain flag by setting the third parameter to true
+  client.enableLastWillMessage("devices/0x/001/status", "offline", true); // You can activate the retain flag by setting the third parameter to true
   client.setKeepAlive(10);
 
   // setup pins
   pinMode(engineRPMpin, INPUT);
   pinMode(fuelSensorADC, INPUT);
   pinMode(waterPresence, INPUT);
+  pinMode(engineSolenoidControl, OUTPUT);
 
   // attach intterupts to engineRPMpin
   attachInterrupt(digitalPinToInterrupt(engineRPMpin), rpmInterrupt, HIGH);
@@ -110,7 +115,7 @@ void setup()
 // This function is called once everything is connected (Wifi and MQTT)
 void onConnectionEstablished()
 {
-  String base = "devices/0x001";
+  String base = "devices/0x/001";
   // Subscribe to "mytopic/test" and display received message to Serial
   client.subscribe(base + "/engineSwitch", [](const String &payload)
    { Serial.println(payload);
@@ -119,6 +124,7 @@ void onConnectionEstablished()
     }else if (payload=="0"){
       digitalWrite(engineSolenoidControl,LOW);
     }
+    Serial.println(digitalRead(engineSolenoidControl));
     });
 
   client.subscribe(base + "/update", [base](const String &payload)
